@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vademecum Interattivo dell'Investitore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfaf7;
+            color: #1a202c;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .step-active {
+            border-left: 4px solid #3b82f6;
+            background: #eff6ff;
+        }
+        
+        input[type="range"] {
+            accent-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="sticky top-0 z-50 bg-white/90 border-b border-stone-200 py-4 px-6 mb-8">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">📊</span>
+                <h1 class="font-bold text-xl tracking-tight text-stone-800 uppercase text-xs sm:text-base">Obbligazioni Vademecum</h1>
+            </div>
+            <div class="hidden md:flex gap-6 text-sm font-medium text-stone-600">
+                <a href="#simulatore" class="hover:text-blue-600 transition">Simulatore Netto</a>
+                <a href="#inflazione" class="hover:text-blue-600 transition">Rendimento Reale</a>
+                <a href="#catalogo" class="hover:text-blue-600 transition">Titoli di Stato</a>
+                <a href="#rendimento" class="hover:text-blue-600 transition">Rendimento</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 pb-20">
+        
+        <header class="text-center mb-16">
+            <h2 class="text-4xl font-extrabold text-stone-900 mb-4">Guida Pratica all'Investimento</h2>
+            <p class="text-lg text-stone-600 max-w-2xl mx-auto">
+                Trasforma il debito in opportunità. Esplora come funzionano le obbligazioni, calcola i rendimenti reali e scopri quale Titolo di Stato italiano è più adatto al tuo profilo.
+            </p>
+        </header>
+
+        <!-- SEZIONE 1: SIMULATORE CICLO DI VITA E RENDIMENTO NETTO -->
+        <section id="simulatore" class="mb-20">
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-2">1. Il Ciclo di Vita Netto di un'Obbligazione</h3>
+                    <p class="text-stone-600">Calcola l'andamento reale del tuo investimento includendo l'impatto fiscale e le imposte governative sul capitale.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-10">
+                    <div class="space-y-6">
+                        <div class="p-4 bg-stone-50 rounded-xl">
+                            <label class="block text-sm font-semibold text-stone-700 mb-2">Capitale Investito (€)</label>
+                            <input type="range" id="inputCapitale" min="1000" max="100000" step="1000" value="10000" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="text-right font-bold text-blue-600 mt-1" id="valCapitale">10.000 €</div>
+                        </div>
+
+                        <!-- MODIFIED CARD: Sincronizzazione campo di input diretto + slider per la cedola -->
+                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200/60 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-semibold text-stone-700">Cedola Annua Lorda (%)</label>
+                                <div class="flex items-center gap-1 bg-white border border-stone-300 rounded-lg px-2 py-1 shadow-inner focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                                    <input type="number" id="inputCedolaNum" min="0" max="100" step="0.01" value="3.50" class="w-16 text-right font-bold text-blue-600 bg-transparent focus:outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                    <span class="font-bold text-stone-400 text-sm">%</span>
+                                </div>
+                            </div>
+                            <input type="range" id="inputCedola" min="0" max="20" step="0.01" value="3.50" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                            <p class="text-xxs text-stone-400 mt-1">Puoi digitare direttamente il valore o trascinare lo slider.</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-stone-50 rounded-xl">
+                                <label class="block text-sm font-semibold text-stone-700 mb-2">Durata</label>
+                                <select id="inputDurata" class="w-full bg-white border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option value="0.5">6 Mesi (BOT)</option>
+                                    <option value="1">1 Anno (BOT/BTP)</option>
+                                    <option value="2">2 Anni (BTP Short)</option>
+                                    <option value="3">3 Anni</option>
+                                    <option value="5" selected>5 Anni</option>
+                                    <option value="7">7 Anni</option>
+                                    <option value="10">10 Anni (Benchmark)</option>
+                                    <option value="15">15 Anni</option>
+                                    <option value="20">20 Anni</option>
+                                    <option value="30">30 Anni</option>
+                                    <option value="50">50 Anni</option>
+                                </select>
+                            </div>
+
+                            <div class="p-4 bg-stone-50 rounded-xl">
+                                <label class="block text-sm font-semibold text-stone-700 mb-2">Tassazione</label>
+                                <select id="inputTassazione" class="w-full bg-white border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option value="12.5" selected>12.5% (Statali)</option>
+                                    <option value="26.0">26.0% (Corporate)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 text-xs text-stone-600 space-y-1">
+                            <p class="font-semibold text-blue-800">Costi considerati nel calcolo:</p>
+                            <p>• Imposta di bollo: <strong class="text-stone-800">0,20% annuo</strong> sul capitale investito.</p>
+                            <p>• Ritenuta Fiscale: detratta direttamente sull'importo della cedola.</p>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <div class="chart-container">
+                            <canvas id="chartLifecycle"></canvas>
+                        </div>
+                        <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-stone-50 p-3 rounded-xl border border-stone-200">
+                                <span class="block text-xxs uppercase tracking-wider font-bold text-stone-500">Cedole Lorde</span>
+                                <span class="text-lg font-bold text-stone-800" id="resTotCedoleLorde">1.750 €</span>
+                            </div>
+                            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                                <span class="block text-xxs uppercase tracking-wider font-bold text-amber-600">Tasse Totali</span>
+                                <span class="text-lg font-bold text-amber-900" id="resTotTasse">-218 €</span>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-xl border border-red-200">
+                                <span class="block text-xxs uppercase tracking-wider font-bold text-red-600">Bollo Totale</span>
+                                <span class="text-lg font-bold text-red-900" id="resTotBollo">-100 €</span>
+                            </div>
+                            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                                <span class="block text-xxs uppercase tracking-wider font-bold text-emerald-600">Rendimento Netto</span>
+                                <span class="text-lg font-bold text-emerald-900" id="resNettoGuadagno">1.432 €</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-stone-900 text-white rounded-xl flex justify-between items-center">
+                            <span class="text-sm font-semibold">Tasso Netto Nominale Annuo:</span>
+                            <span class="text-xl font-bold text-emerald-400" id="resRendimentoNominaleNettoAnnuo">2.86 %</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEZIONE 1.5: ANALIZZATORE DI INFLAZIONE E RENDIMENTO REALE -->
+        <section id="inflazione" class="mb-20">
+            <div class="bg-gradient-to-br from-stone-900 to-stone-950 text-white rounded-2xl p-8 shadow-md">
+                <div class="mb-8">
+                    <span class="px-3 py-1 bg-red-500/20 text-red-400 text-xs font-semibold rounded-full uppercase tracking-wider border border-red-500/30">Il Nemico Invisibile</span>
+                    <h3 class="text-2xl font-bold mt-2">L'Inflazione & Il Rendimento Reale</h3>
+                    <p class="text-stone-300 mt-1">Anche se il tuo conto mostra una crescita nominale, l'inflazione riduce silenziosamente il valore d'acquisto del denaro.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div class="space-y-6">
+                        <div class="p-5 bg-white/5 rounded-xl border border-white/10">
+                            <label class="block text-sm font-semibold text-stone-300 mb-2">Tasso di Inflazione Annuo Stimato (%)</label>
+                            <input type="range" id="inputInflazione" min="0" max="10" step="0.1" value="2.0" class="w-full h-2 bg-stone-700 rounded-lg appearance-none cursor-pointer">
+                            <div class="text-right font-bold text-red-400 mt-1 text-lg" id="valInflazione">2.0 %</div>
+                        </div>
+
+                        <div class="space-y-3 text-sm text-stone-300">
+                            <p class="flex items-start gap-2">
+                                <span class="text-emerald-400 font-bold">✓</span>
+                                <span>Il rendimento reale rispecchia la crescita effettiva del tuo potere d'acquisto.</span>
+                            </p>
+                            <p class="flex items-start gap-2">
+                                <span class="text-red-400 font-bold">⚠</span>
+                                <span>Se l'inflazione è superiore al tasso nominale netto, stai tecnicamente perdendo ricchezza reale.</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="containerReale" class="p-6 rounded-2xl bg-stone-800/40 border border-white/10 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-stone-300 font-medium">Tasso Reale Annuo:</span>
+                            <span id="badgeReale" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400">Rendimento Positivo</span>
+                        </div>
+                        <div class="py-2 border-b border-white/10">
+                            <div class="text-4xl font-extrabold text-emerald-400" id="resRendimentoRealeAnnuo">0.84 %</div>
+                            <p class="text-stone-400 text-xs mt-1">Formula reale composta di Fisher: [(1 + Nominale) / (1 + Inflazione)] - 1</p>
+                        </div>
+
+                        <div class="space-y-3 text-sm pt-2">
+                            <div class="flex justify-between text-stone-300">
+                                <span>Capitale + Guadagno Netto a Scadenza:</span>
+                                <span class="font-bold text-white" id="resValoreNominaleFinale">11.432 €</span>
+                            </div>
+                            <div class="flex justify-between text-stone-300">
+                                <span>Potere d'Acquisto Reale Attualizzato:</span>
+                                <span class="font-bold text-emerald-400" id="resPotereAcquistoReale">10.354 €</span>
+                            </div>
+                            <div class="flex justify-between text-stone-400 text-xs pt-1 border-t border-white/5">
+                                <span>Perdita di Potere d'Acquisto Cumulata:</span>
+                                <span class="font-bold text-red-400" id="resPerditaPotereAcquisto">-1.078 €</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEZIONE 2: CATALOGO TITOLI DI STATO -->
+        <section id="catalogo" class="mb-20">
+            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h3 class="text-2xl font-bold text-stone-800 mb-2">2. Mappa dei Titoli di Stato Italiani</h3>
+                    <p class="text-stone-600">Confronta le emissioni del MEF in base al tuo profilo di rischio e necessità di liquidità.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="filterBonds('all')" class="px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-800 hover:text-white transition text-sm font-semibold">Tutti</button>
+                    <button onclick="filterBonds('fisso')" class="px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-800 hover:text-white transition text-sm font-semibold">Tasso Fisso</button>
+                    <button onclick="filterBonds('variabile')" class="px-4 py-2 rounded-full bg-stone-200 text-stone-700 hover:bg-stone-800 hover:text-white transition text-sm font-semibold">Variabile/Inf</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="bondGrid">
+                <!-- Cards generate via JS -->
+            </div>
+            
+            <div class="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-3">
+                <span class="text-xl">💡</span>
+                <p class="text-sm text-amber-800 leading-relaxed">
+                    <strong>Nota Fiscale:</strong> Tutti i titoli sopra elencati beneficiano della tassazione agevolata al <strong>12,5%</strong> sulle rendite finanziarie, rispetto al 26% standard di azioni e bond societari.
+                </p>
+            </div>
+        </section>
+
+        <!-- SEZIONE 3: RENDIMENTO NEGATIVO -->
+        <section id="rendimento" class="mb-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="order-2 lg:order-1">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-6">3. Perché il Rendimento può essere Negativo?</h3>
+                    <div class="space-y-4">
+                        <div class="p-6 bg-white rounded-xl border border-stone-200 shadow-sm hover:border-red-200 transition group">
+                            <div class="flex items-center gap-4 mb-2">
+                                <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold">A</span>
+                                <h4 class="font-bold text-stone-800 group-hover:text-red-600">Inflazione (Rendimento Reale)</h4>
+                            </div>
+                            <p class="text-sm text-stone-600 pl-14">Se l'inflazione supera la cedola, il potere d'acquisto cala. Hai più banconote, ma compri meno pane.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl border border-stone-200 shadow-sm hover:border-red-200 transition group">
+                            <div class="flex items-center gap-4 mb-2">
+                                <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold">B</span>
+                                <h4 class="font-bold text-stone-800 group-hover:text-red-600">Tasse e Costi Fissi</h4>
+                            </div>
+                            <p class="text-sm text-stone-600 pl-14">Imposta di bollo (0,20%) e commissioni possono superare cedole molto basse (es. 0,10%).</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl border border-stone-200 shadow-sm hover:border-red-200 transition group">
+                            <div class="flex items-center gap-4 mb-2">
+                                <span class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold">C</span>
+                                <h4 class="font-bold text-stone-800 group-hover:text-red-600">Acquisto "Sopra la Pari"</h4>
+                            </div>
+                            <p class="text-sm text-stone-600 pl-14">Comprare a 102 € per ricevere 100 € a scadenza genera una perdita certa in conto capitale.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2 bg-stone-900 rounded-3xl p-8 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h4 class="text-blue-400 font-bold uppercase tracking-widest text-xs mb-4">L'Analogia Immobiliare</h4>
+                        <p class="text-xl leading-relaxed mb-6">
+                            "Compri un appartamento per <span class="text-emerald-400">100.000€</span> che rende <span class="text-emerald-400">5.000€</span> di affitto. Se il mercato crolla e le case simili costano ora <span class="text-amber-400">50.000€</span>, chi compra OGGI fa un affare al <span class="text-amber-400">10%</span>. Ma tu continui a prendere il tuo <span class="text-emerald-400">5%</span> sul capitale originario."
+                        </p>
+                        <div class="flex items-center gap-2 text-stone-400 italic text-sm">
+                            <span>ℹ️</span>
+                            <span>Spiega la differenza tra Rendimento di Mercato e Rendimento Storico (Personale).</span>
+                        </div>
+                    </div>
+                    <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 py-12 px-6 text-center text-stone-500 text-sm">
+        <p class="mb-2 font-semibold">Vademecum Interattivo dell'Investitore</p>
+        <p>Applicazione a scopo informativo basata su dati MEF e principi finanziari standard.</p>
+    </footer>
+
+    <script>
+        const bondData = [
+            { id: 'bot', sigla: 'BOT', nome: 'Buoni Ordinari Tesoro', durata: '3-12 mesi', tipo: 'fisso', cedola: 'Zero-coupon', target: 'Liquidità breve', desc: 'Si acquistano sotto la pari, il guadagno è lo scarto.' },
+            { id: 'btp', sigla: 'BTP', nome: 'Buoni Tesoro Poliennali', durata: '3-50 anni', tipo: 'fisso', cedola: 'Fissa Semestrale', target: 'Entrate costanti', desc: 'Il classico titolo di Stato con flussi certi.' },
+            { id: 'cct', sigla: 'CCTeu', nome: 'Certificati Credito Tesoro', durata: '3-7 anni', tipo: 'variabile', cedola: 'Variabile (Euribor)', target: 'Protezione Tassi', desc: 'Ideale se pensi che i tassi europei saliranno.' },
+            { id: 'it', sigla: 'BTP Italia', nome: 'BTP Indice Inflazione IT', durata: '4-8 anni', tipo: 'variabile', cedola: 'Variabile (Inflazione IT)', target: 'Difesa Potere Acquisto', desc: 'Cedole e capitale rivalutati sul costo vita ITA.' },
+            { id: 'ei', sigla: 'BTP€i', nome: 'BTP Indice Inflazione EU', durata: '5-30 anni', tipo: 'variabile', cedola: 'Variabile (Inflazione EU)', target: 'Investitori Istituzionali', desc: 'Protezione contro inflazione area Euro.' },
+            { id: 'val', sigla: 'BTP Valore', nome: 'BTP Valore (Retail)', durata: '4-6 anni', tipo: 'fisso', cedola: 'Step-up (Crescente)', target: 'Piccoli Risparmiatori', desc: 'Cedole prefissate che aumentano nel tempo + premio fedeltà.' }
+        ];
+
+        let lifecycleChart;
+
+        window.onload = () => {
+            initLifecycleChart();
+            renderBonds(bondData);
+            setupEventListeners();
+            updateCalculations();
+        };
+
+        function setupEventListeners() {
+            document.getElementById('inputCapitale').addEventListener('input', updateCalculations);
+            
+            // Gestione dei due controlli per la cedola sincronizzati
+            const sliderCedola = document.getElementById('inputCedola');
+            const inputCedolaNum = document.getElementById('inputCedolaNum');
+
+            sliderCedola.addEventListener('input', function() {
+                inputCedolaNum.value = parseFloat(this.value).toFixed(2);
+                updateCalculations();
+            });
+
+            inputCedolaNum.addEventListener('input', function() {
+                let parsedVal = parseFloat(this.value);
+                if (isNaN(parsedVal)) {
+                    parsedVal = 0;
+                }
+                // Impedisce di immettere cifre insensate (limite cautelativo 100%)
+                if (parsedVal > 100) {
+                    parsedVal = 100;
+                    this.value = 100;
+                }
+                if (parsedVal < 0) {
+                    parsedVal = 0;
+                    this.value = 0;
+                }
+                sliderCedola.value = parsedVal;
+                updateCalculations();
+            });
+
+            // Sincronizza al blur per inserire i decimali vuoti (es. "3" -> "3.00")
+            inputCedolaNum.addEventListener('blur', function() {
+                let parsedVal = parseFloat(this.value);
+                if (isNaN(parsedVal)) parsedVal = 0;
+                this.value = parsedVal.toFixed(2);
+            });
+
+            document.getElementById('inputDurata').addEventListener('change', updateCalculations);
+            document.getElementById('inputTassazione').addEventListener('change', updateCalculations);
+            document.getElementById('inputInflazione').addEventListener('input', updateCalculations);
+        }
+
+        function updateCalculations() {
+            const cap = parseFloat(document.getElementById('inputCapitale').value);
+            const cedPerc = parseFloat(document.getElementById('inputCedola').value);
+            const durata = parseFloat(document.getElementById('inputDurata').value);
+            const aliquotaFiscale = parseFloat(document.getElementById('inputTassazione').value) / 100;
+            const impostaBolloPercentuale = 0.0020; // 0.20% fisso annuo sul portafoglio obbligazionario
+
+            document.getElementById('valCapitale').innerText = cap.toLocaleString('it-IT') + ' €';
+            
+            // Sincronizza la casella di testo se l'utente sta usando solo lo slider (per evitare disallineamenti di cursore)
+            const inputCedolaNum = document.getElementById('inputCedolaNum');
+            if (document.activeElement !== inputCedolaNum) {
+                inputCedolaNum.value = cedPerc.toFixed(2);
+            }
+
+            // Matematica dei rendimenti annualizzati
+            const cedolaAnnuaLorda = (cap * cedPerc) / 100;
+            const ritenutaFiscaleAnnua = cedolaAnnuaLorda * aliquotaFiscale;
+            const impostaBolloAnnua = cap * impostaBolloPercentuale;
+            const cedolaAnnuaNetta = cedolaAnnuaLorda - ritenutaFiscaleAnnua - impostaBolloAnnua;
+
+            // Risultati totali accumulati per la durata scelta
+            const totCedoleLorde = cedolaAnnuaLorda * durata;
+            const totTasse = ritenutaFiscaleAnnua * durata;
+            const totBollo = impostaBolloAnnua * durata;
+            const totNettoGuadagno = cedolaAnnuaNetta * durata;
+
+            const rendimentoNominaleNettoAnnuo = (cedolaAnnuaNetta / cap) * 100;
+
+            // Aggiornamento dati sull'interfaccia utente
+            document.getElementById('resTotCedoleLorde').innerText = totCedoleLorde.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+            document.getElementById('resTotTasse').innerText = '-' + totTasse.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+            document.getElementById('resTotBollo').innerText = '-' + totBollo.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+            document.getElementById('resNettoGuadagno').innerText = (totNettoGuadagno >= 0 ? '+' : '') + totNettoGuadagno.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+            document.getElementById('resRendimentoNominaleNettoAnnuo').innerText = rendimentoNominaleNettoAnnuo.toFixed(2) + ' %';
+
+            updateLifecycleChart(cap, cedolaAnnuaNetta, ritenutaFiscaleAnnua, impostaBolloAnnua, durata);
+            updateRealReturn(rendimentoNominaleNettoAnnuo, cap, durata, totNettoGuadagno);
+        }
+
+        function updateRealReturn(nominalNetRateAnnuo, cap, durata, totNettoGuadagno) {
+            const infPerc = parseFloat(document.getElementById('inputInflazione').value);
+            document.getElementById('valInflazione').innerText = infPerc.toFixed(1) + ' %';
+
+            const nominalRateDec = nominalNetRateAnnuo / 100;
+            const inflationDec = infPerc / 100;
+
+            // Formula esatta di Fisher per l'attualizzazione reale complessa
+            const rendimentoRealeAnnuo = ((1 + nominalRateDec) / (1 + inflationDec) - 1) * 100;
+
+            const elRendimentoReale = document.getElementById('resRendimentoRealeAnnuo');
+            elRendimentoReale.innerText = (rendimentoRealeAnnuo >= 0 ? '+' : '') + rendimentoRealeAnnuo.toFixed(2) + ' %';
+
+            // Adattamento visivo in base all'esito del rendimento reale
+            const badgeReale = document.getElementById('badgeReale');
+            const containerReale = document.getElementById('containerReale');
+            if (rendimentoRealeAnnuo < 0) {
+                elRendimentoReale.className = "text-4xl font-extrabold text-rose-500";
+                badgeReale.innerText = "RENDIMENTO REALE NEGATIVO ⚠";
+                badgeReale.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30";
+                containerReale.className = "p-6 rounded-2xl bg-rose-950/20 border border-rose-500/30 space-y-4";
+            } else {
+                elRendimentoReale.className = "text-4xl font-extrabold text-emerald-400";
+                badgeReale.innerText = "RENDIMENTO REALE POSITIVO ✓";
+                badgeReale.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+                containerReale.className = "p-6 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 space-y-4";
+            }
+
+            // Calcolo esatto dell'erosione d'acquisto reale a scadenza
+            const totaleNominaleA_Scadenza = cap + totNettoGuadagno;
+            const potereAcquistoReale = totaleNominaleA_Scadenza / Math.pow(1 + inflationDec, durata);
+            const perditaPotereAcquisto = totaleNominaleA_Scadenza - potereAcquistoReale;
+
+            document.getElementById('resValoreNominaleFinale').innerText = totaleNominaleA_Scadenza.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+            document.getElementById('resPotereAcquistoReale').innerText = potereAcquistoReale.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+            document.getElementById('resPerditaPotereAcquisto').innerText = '-' + perditaPotereAcquisto.toLocaleString('it-IT', {maximumFractionDigits: 2}) + ' €';
+        }
+
+        function renderBonds(data) {
+            const grid = document.getElementById('bondGrid');
+            grid.innerHTML = '';
+            data.forEach(bond => {
+                const card = `
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded uppercase">${bond.sigla}</span>
+                            <span class="text-stone-400 text-xs">${bond.durata}</span>
+                        </div>
+                        <h4 class="font-bold text-stone-800 mb-2">${bond.nome}</h4>
+                        <p class="text-xs text-stone-500 mb-4 h-12 overflow-hidden">${bond.desc}</p>
+                        <div class="pt-4 border-t border-stone-100 space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-stone-400">Cedola:</span>
+                                <span class="font-semibold text-stone-700">${bond.cedola}</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-stone-400">Target:</span>
+                                <span class="font-semibold text-stone-700">${bond.target}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function filterBonds(type) {
+            if(type === 'all') renderBonds(bondData);
+            else {
+                const filtered = bondData.filter(b => b.tipo === type);
+                renderBonds(filtered);
+            }
+        }
+
+        function initLifecycleChart() {
+            const ctx = document.getElementById('chartLifecycle').getContext('2d');
+            lifecycleChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Cedola Netta', data: [], backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Tasse Ritenute', data: [], backgroundColor: '#f59e0b', borderRadius: 4 },
+                        { label: 'Imposta di Bollo (0,20%)', data: [], backgroundColor: '#ef4444', borderRadius: 4 },
+                        { label: 'Capitale Rimborsato', data: [], backgroundColor: '#3b82f6', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Valore in €' } }
+                    }
+                }
+            });
+        }
+
+        function updateLifecycleChart(cap, netta, tasse, bollo, durata) {
+            const isShortTerm = durata < 1;
+            const numBars = isShortTerm ? 1 : Math.floor(durata);
+            
+            const labels = Array.from({length: numBars}, (_, i) => {
+                if (isShortTerm) return `${durata * 12} Mesi`;
+                return `Anno ${i + 1}`;
+            });
+            
+            const barNetta = isShortTerm ? netta * durata : netta;
+            const barTasse = isShortTerm ? tasse * durata : tasse;
+            const barBollo = isShortTerm ? bollo * durata : bollo;
+            
+            const dataNetta = Array(numBars).fill(barNetta);
+            const dataTasse = Array(numBars).fill(barTasse);
+            const dataBollo = Array(numBars).fill(barBollo);
+            const dataCapitale = Array(numBars).fill(0);
+            dataCapitale[numBars - 1] = cap; // Capitale rimborsato solo alla scadenza
+
+            lifecycleChart.data.labels = labels;
+            lifecycleChart.data.datasets[0].data = dataNetta;
+            lifecycleChart.data.datasets[1].data = dataTasse;
+            lifecycleChart.data.datasets[2].data = dataBollo;
+            lifecycleChart.data.datasets[3].data = dataCapitale;
+            lifecycleChart.update();
+        }
+    </script>
+</body>
+</html>
